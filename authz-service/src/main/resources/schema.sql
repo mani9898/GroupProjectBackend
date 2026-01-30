@@ -1,0 +1,1 @@
+drop table if exists social_media_users;
