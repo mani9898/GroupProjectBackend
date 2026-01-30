@@ -1,13 +1,13 @@
-package org.example.likeservice;
+package org.example.socialservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class LikeServiceApplication {
+public class SocialServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(LikeServiceApplication.class, args);
+        SpringApplication.run(SocialServiceApplication.class, args);
     }
 
 }

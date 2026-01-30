@@ -2,12 +2,12 @@ package org.example.authzservice.controller;
 
 
 import jakarta.validation.Valid;
-import org.example.authservice.dtos.LoginDto;
-import org.example.authservice.dtos.RegisterRequest;
-import org.example.authservice.entity.MediaUser;
-import org.example.authservice.exceptions.InvalidUserCred;
-import org.example.authservice.exceptions.UserAlreadyExistsException;
-import org.example.authservice.service.SocialMediaUserService;
+import org.example.authzservice.dtos.LoginDto;
+import org.example.authzservice.dtos.RegisterRequest;
+import org.example.authzservice.entity.MediaUser;
+import org.example.authzservice.exceptions.InvalidUserCred;
+import org.example.authzservice.exceptions.UserAlreadyExistsException;
+import org.example.authzservice.service.SocialMediaUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

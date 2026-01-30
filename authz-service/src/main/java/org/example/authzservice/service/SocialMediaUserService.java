@@ -1,11 +1,11 @@
 package org.example.authzservice.service;
 
 
-import org.example.authservice.entity.MediaUser;
-import org.example.authservice.entity.UserStatus;
-import org.example.authservice.exceptions.InvalidUserCred;
-import org.example.authservice.exceptions.UserAlreadyExistsException;
-import org.example.authservice.repo.SocialMediaUserRepository;
+import org.example.authzservice.entity.MediaUser;
+import org.example.authzservice.entity.UserStatus;
+import org.example.authzservice.exceptions.InvalidUserCred;
+import org.example.authzservice.exceptions.UserAlreadyExistsException;
+import org.example.authzservice.repo.SocialMediaUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

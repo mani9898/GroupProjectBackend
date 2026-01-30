@@ -1,7 +1,7 @@
 package org.example.authzservice.service;
 
 import com.nimbusds.jose.jwk.RSAKey;
-import org.example.authservice.entity.MediaUser;
+import org.example.authzservice.entity.MediaUser;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
