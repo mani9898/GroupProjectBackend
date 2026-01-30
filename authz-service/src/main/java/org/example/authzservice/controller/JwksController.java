@@ -5,7 +5,7 @@ package org.example.authzservice.controller;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 
-import org.example.authservice.service.JwtService;
+import org.example.authzservice.service.JwtService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 

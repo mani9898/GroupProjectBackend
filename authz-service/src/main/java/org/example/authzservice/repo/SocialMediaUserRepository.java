@@ -2,7 +2,7 @@ package org.example.authzservice.repo;
 
 
 
-import org.example.authservice.entity.MediaUser;
+import org.example.authzservice.entity.MediaUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
