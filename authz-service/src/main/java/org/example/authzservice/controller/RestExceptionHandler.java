@@ -1,9 +1,10 @@
 package org.example.authzservice.controller;
 
 
-import org.example.authservice.dtos.ResponseRegisterErrorDto;
-import org.example.authservice.exceptions.InvalidUserCred;
-import org.example.authservice.exceptions.UserAlreadyExistsException;
+
+import org.example.authzservice.dtos.ResponseRegisterErrorDto;
+import org.example.authzservice.exceptions.InvalidUserCred;
+import org.example.authzservice.exceptions.UserAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

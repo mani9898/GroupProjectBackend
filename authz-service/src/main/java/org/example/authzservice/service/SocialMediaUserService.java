@@ -1,11 +1,12 @@
 package org.example.authzservice.service;
 
 
-import org.example.authservice.entity.MediaUser;
-import org.example.authservice.entity.UserStatus;
-import org.example.authservice.exceptions.InvalidUserCred;
-import org.example.authservice.exceptions.UserAlreadyExistsException;
-import org.example.authservice.repo.SocialMediaUserRepository;
+
+import org.example.authzservice.entity.MediaUser;
+import org.example.authzservice.entity.UserStatus;
+import org.example.authzservice.exceptions.InvalidUserCred;
+import org.example.authzservice.exceptions.UserAlreadyExistsException;
+import org.example.authzservice.repo.SocialMediaUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,7 @@ public class SocialMediaUserService {
 
         if (socialMediaUserRepository.findByUsername(mediaUser.getUsername()) != null) {
             List<String> suggestions = generateUsernameSuggestions(username);
-            throw new UserAlreadyExistsException("This username is take here  are some suggestions", suggestions);
+            throw new UserAlreadyExistsException("This username is taken. Here are some suggestions", suggestions);
         }
         if (socialMediaUserRepository.findByEmail(mediaUser.getEmail()) != null) {
             throw new UserAlreadyExistsException("This email is taken", new ArrayList<>());
