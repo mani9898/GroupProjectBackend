@@ -6,6 +6,8 @@ import org.example.profileservice.dtos.RequestProfile;
 import org.example.profileservice.entities.Profile;
 import org.example.profileservice.services.ProfileService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,7 +21,6 @@ public class ProfileController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProfileDto> getProfile(@PathVariable Long id) {
-        System.out.println("Fetching profile with ID: " + id);
         Profile profile = profileService.getProfileById(id);
         ProfileDto profileDto = new ProfileDto(profile.getId(),
                 profile.getUsername(), profile.getAboutMe(), profile.getDisplayName(),
@@ -29,28 +30,36 @@ public class ProfileController {
     }
 
     @PostMapping
-    public ResponseEntity<ProfileDto> createProfile(@RequestBody RequestProfile requestProfile) {
-        Profile profile = profileService.createProfile(new Profile(
-                requestProfile.username(),
-                requestProfile.aboutMe(),
-                requestProfile.displayName(),
-                requestProfile.profilePictureUrl(),
-                requestProfile.location(),
-                requestProfile.birthdate(),
-                requestProfile.gender(),
-                requestProfile.secondaryImageUrl(),
-                requestProfile.phoneNumber()
-        ));
-        ProfileDto profileDto = new ProfileDto(profile.getId(),
-                profile.getUsername(), profile.getAboutMe(), profile.getDisplayName(),
-                profile.getProfilePictureUrl(), profile.getLocation(), profile.getBirthdate(),
-                profile.getGender(), profile.getSecondaryImageUrl(), profile.getPhoneNumber());
-        return ResponseEntity.ok(profileDto);
+    public ResponseEntity<ProfileDto> createProfile(@RequestBody RequestProfile requestProfile,@AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getSubject();
+        if (username.equalsIgnoreCase(requestProfile.username())) {
+            Profile profile = profileService.createProfile(new Profile(
+                    requestProfile.username(),
+                    requestProfile.aboutMe(),
+                    requestProfile.displayName(),
+                    requestProfile.profilePictureUrl(),
+                    requestProfile.location(),
+                    requestProfile.birthdate(),
+                    requestProfile.gender(),
+                    requestProfile.secondaryImageUrl(),
+                    requestProfile.phoneNumber()
+            ));
+            ProfileDto profileDto = new ProfileDto(profile.getId(),
+                    profile.getUsername(), profile.getAboutMe(), profile.getDisplayName(),
+                    profile.getProfilePictureUrl(), profile.getLocation(), profile.getBirthdate(),
+                    profile.getGender(), profile.getSecondaryImageUrl(), profile.getPhoneNumber());
+            return ResponseEntity.ok(profileDto);
+        } else {
+            return ResponseEntity.status(403).build();
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProfileDto> updateProfile(@PathVariable Long id, @RequestBody ProfileDto profileDto) {
-        Profile profile = profileService.updateProfile(
+    public ResponseEntity<ProfileDto> updateProfile(@PathVariable Long id, @RequestBody ProfileDto profileDto, @AuthenticationPrincipal Jwt jwt) {
+        String username = jwt.getSubject();
+        if (username.equalsIgnoreCase(profileDto.username())) {
+
+            Profile profile = profileService.updateProfile(
                 id,
                 new Profile(
                         profileDto.username(),
@@ -68,6 +77,9 @@ public class ProfileController {
                 profile.getProfilePictureUrl(), profile.getLocation(), profile.getBirthdate(),
                 profile.getGender(), profile.getSecondaryImageUrl(), profile.getPhoneNumber());
         return ResponseEntity.ok(updatedProfileDto);
+        } else {
+            return ResponseEntity.status(403).build();
+        }
     }
 
 }
