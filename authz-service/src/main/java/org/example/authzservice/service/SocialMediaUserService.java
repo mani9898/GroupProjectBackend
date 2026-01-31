@@ -1,8 +1,10 @@
 package org.example.authzservice.service;
 
 
+import org.example.authzservice.dtos.ResponseInternalCheck;
 import org.example.authzservice.entity.MediaUser;
 import org.example.authzservice.entity.UserStatus;
+import org.example.authzservice.exceptions.FollowerNotFound;
 import org.example.authzservice.exceptions.InvalidUserCred;
 import org.example.authzservice.exceptions.UserAlreadyExistsException;
 import org.example.authzservice.repo.SocialMediaUserRepository;
@@ -136,4 +138,18 @@ public class SocialMediaUserService {
         String token = jwtService.generateToken(mediaUser);
         return Map.of("token", token);
     }
+
+public ResponseInternalCheck getMediaUser(String username) {
+    if (username == null || username.isBlank()) {
+        throw new FollowerNotFound("USERNAME_MISSING");
+    }
+
+    MediaUser mediaUser = socialMediaUserRepository.findByUsername(username);
+    if (mediaUser == null) {
+        throw new FollowerNotFound("USER_NOT_FOUND");
+    }
+
+    return new ResponseInternalCheck(mediaUser.getUsername(), mediaUser.getStatus(), mediaUser.getLoggedIn());
+}
+
 }
