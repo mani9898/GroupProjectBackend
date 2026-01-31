@@ -24,8 +24,8 @@ import java.util.Random;
 public class SocialMediaUserService {
 
     private static final int MAX_ATTEMPTS = 5;
-    private static final long ATTEMPT_WINDOW_MINUTES = 15; // reset attempts after this idle time
-    private static final long BLOCK_MINUTES = 15; // lock duration
+    private static final long ATTEMPT_WINDOW_MINUTES = 5; // reset attempts after this idle time
+    private static final long BLOCK_MINUTES = 5; // lock duration
     @Autowired
     JwtService jwtService;
     @Autowired
@@ -57,32 +57,26 @@ public class SocialMediaUserService {
     }
 
     private List<String> generateUsernameSuggestions(String username) {
-        String base;
-        if (username == null || username.isBlank()) {
-            base = "user";
-        } else {
-            base = username.length() >= 3 ? username.substring(0, 3) : username;
+
+        // Generate 3 suggestions
+        List<String> suggestions = new ArrayList<>();
+        // get suggested username
+        while (suggestions.size() != 3 ){
+            String suggestedUsername = getNewUsernameSuggestion(username);
+            // check if username exists
+            MediaUser existingUser = socialMediaUserRepository.findByUsername(suggestedUsername);
+            if (existingUser == null) {
+                suggestions.add(suggestedUsername);
         }
-
-        base = base.toLowerCase();
-        List<String> suggestions = new ArrayList<>(3);
-        Random rnd = new Random();
-        int attempts = 0;
-
-        while (suggestions.size() < 3 && attempts < 10000) {
-            attempts++;
-            String candidate = base + (attempts); // incrementing suffix ensures termination
-            if (socialMediaUserRepository.findByUsername(candidate) == null && !suggestions.contains(candidate)) {
-                suggestions.add(candidate);
-                continue;
-            }
-            String randCandidate = base + (rnd.nextInt(900) + 100);
-            if (socialMediaUserRepository.findByUsername(randCandidate) == null && !suggestions.contains(randCandidate)) {
-                suggestions.add(randCandidate);
-            }
         }
         return suggestions;
 
+    }
+
+    private String getNewUsernameSuggestion(String base) {
+        Random random = new Random();
+        int number = random.nextInt(1000);
+        return base + number;
     }
 
     public Map<String, String> login(String username, String password) {
