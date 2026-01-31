@@ -6,6 +6,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -27,13 +28,14 @@ public class JwtConfig {
     public JwtConfig(Environment env) {
         this.env = env;
     }
-
+    @Value("${security.jwt.key-store.location}")
+    private String keystorePath;
+    @Value("${security.jwt.key-store.password}")
+    private String keystorePassword;
+    @Value("${security.jwt.key-store.alias}")
+    private String keyAlias;
     @Bean
     public RSAKey rsaKey() throws Exception {
-        // Provide sensible defaults so missing properties don't break startup
-        String keystorePath = env.getProperty("security.jwt.key-store.location", "classpath:keystore.jks");
-        String keystorePassword = env.getProperty("security.jwt.key-store.password", "");
-        String keyAlias = env.getProperty("security.jwt.key-store.alias", "certificate");
 
         if (Objects.isNull(keystorePath) || Objects.isNull(keystorePassword) || Objects.isNull(keyAlias)) {
             throw new IllegalStateException("Missing JWT keystore configuration: ensure security.jwt.key-store.{location,password,alias} are set");

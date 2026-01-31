@@ -2,6 +2,7 @@ package org.example.authzservice.controller;
 
 
 import org.example.authzservice.dtos.ResponseRegisterErrorDto;
+import org.example.authzservice.exceptions.FollowerNotFound;
 import org.example.authzservice.exceptions.InvalidUserCred;
 import org.example.authzservice.exceptions.UserAlreadyExistsException;
 import org.springframework.http.HttpStatus;
@@ -21,5 +22,10 @@ public class RestExceptionHandler {
     @ExceptionHandler(InvalidUserCred.class)
     public ResponseEntity<String> handleInvalidUserCred(InvalidUserCred ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(FollowerNotFound.class)
+    public ResponseEntity<String> handleFollowerNotFound(FollowerNotFound ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 }
