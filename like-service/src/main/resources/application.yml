@@ -1,22 +1,41 @@
 server:
-  port: 9100   
+  port: 9003
 
 spring:
+  application:
+    name: social-service
+
   datasource:
-    url: "jdbc:postgresql://localhost:5432/social_service_db"
-    username: "postgres"
-    password: "tom4wolf"
-    driver-class-name: "org.postgresql.Driver"
+    url: jdbc:postgresql://localhost:5432/social_service_db
+    username: postgres
+    password: 
+    driver-class-name: org.postgresql.Driver
 
   jpa:
-    database-platform: "org.hibernate.dialect.PostgreSQLDialect"
     hibernate:
-      ddl-auto: update   
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
 
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: "http://localhost:9000"   
+          issuer-uri: http://localhost:9000
+
+# 🔗 Downstream service locations
+services:
+  auth:
+    base-url: http://localhost:9000
+  profile:
+    base-url: http://localhost:9001
+  post:
+    base-url: http://localhost:9002
+
+# 🔍 Debugging (optional but VERY helpful early on)
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web.client: DEBUG
+    feign: DEBUG
 
