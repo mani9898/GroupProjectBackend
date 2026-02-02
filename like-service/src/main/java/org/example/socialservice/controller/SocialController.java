@@ -3,6 +3,7 @@ package org.example.socialservice.controller;
 import java.util.List;
 
 import org.example.socialservice.service.SocialService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,54 +30,58 @@ public class SocialController {
     /* ---------- Likes ---------- */
 
     @PostMapping("/posts/{postId}/like")
-    public void like(@PathVariable Long postId,
+    public ResponseEntity<Void> like(@PathVariable Long postId,
                      @AuthenticationPrincipal Jwt jwt) {
         service.likePost(postId, currentUser(jwt));
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/posts/{postId}/like")
-    public void unlike(@PathVariable Long postId,
+    public ResponseEntity<Void> unlike(@PathVariable Long postId,
                        @AuthenticationPrincipal Jwt jwt) {
         service.unlikePost(postId, currentUser(jwt));
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/posts/{postId}/likes/count")
-    public long count(@PathVariable Long postId) {
-        return service.likeCount(postId);
+    public ResponseEntity<Long> count(@PathVariable Long postId) {
+        return ResponseEntity.ok(service.likeCount(postId));
     }
 
     /* ---------- Follows ---------- */
 
     @PostMapping("/users/{username}/follow")
-    public void follow(@PathVariable String username,
+    public ResponseEntity<Void> follow(@PathVariable String username,
                        @AuthenticationPrincipal Jwt jwt) {
         service.follow(currentUser(jwt), username);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/users/{username}/follow")
-    public void unfollow(@PathVariable String username,
+    public ResponseEntity<Void> unfollow(@PathVariable String username,
                          @AuthenticationPrincipal Jwt jwt) {
         service.unfollow(currentUser(jwt), username);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/users/{username}/followers")
-    public List<String> followers(@PathVariable String username) {
-        return service.followers(username);
+    public ResponseEntity<List<String>> followers(@PathVariable String username) {
+        return ResponseEntity.ok(service.followers(username));
     }
 
     @GetMapping("/users/{username}/following")
-    public List<String> following(@PathVariable String username) {
-        return service.following(username);
+    public ResponseEntity<List<String>> following(@PathVariable String username) {
+    	return ResponseEntity.ok(service.following(username));
     }
     
     @GetMapping("/users/{userId}/followers/count")
-    public long getFollowerCount(@PathVariable Long userId) {
-        return service.getFollowerCount(userId);
+    public ResponseEntity<Long> getFollowerCount(@PathVariable Long userId) {
+        return ResponseEntity.ok(service.getFollowerCount(userId));
     }
 
     @GetMapping("/users/{userId}/following/count")
-    public long getFollowingCount(@PathVariable Long userId) {
-        return service.getFollowingCount(userId);
+    public ResponseEntity<Long> getFollowingCount(@PathVariable Long userId) {
+    	return ResponseEntity.ok(service.getFollowingCount(userId));
     }
 }
 
