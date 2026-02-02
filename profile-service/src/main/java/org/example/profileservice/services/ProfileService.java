@@ -34,4 +34,8 @@ public class ProfileService {
     public List<Profile> getProfiles(List<Long> followerIds) {
         return profileRepository.findAllById(followerIds);
     }
+
+    public Profile getByUsername(String username) {
+        return profileRepository.getByUsername(username);
+    }
 }

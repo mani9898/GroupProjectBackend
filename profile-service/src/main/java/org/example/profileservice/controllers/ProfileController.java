@@ -82,4 +82,17 @@ public class ProfileController {
         }
     }
 
+    @GetMapping
+    public ResponseEntity<ProfileDto> searchProfileByUsername(@RequestParam String username) {
+        Profile profile = profileService.getByUsername(username);
+        if(profile == null){
+            return ResponseEntity.notFound().build();
+        }
+        ProfileDto profileDto = new ProfileDto(profile.getId(),
+                profile.getUsername(), profile.getAboutMe(), profile.getDisplayName(),
+                profile.getProfilePictureUrl(), profile.getLocation(), profile.getBirthdate(),
+                profile.getGender(), profile.getSecondaryImageUrl(), profile.getPhoneNumber());
+        return ResponseEntity.ok(profileDto);
+    }
+
 }
