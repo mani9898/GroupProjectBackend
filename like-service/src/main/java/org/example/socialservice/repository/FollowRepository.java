@@ -11,23 +11,14 @@ import java.util.List;
 @Repository
 public interface FollowRepository extends JpaRepository<Follow, FollowId> {
 
-    @Query("""
-        SELECT f.id.followeeUsername
-        FROM Follow f
-        WHERE f.id.followerUsername = :username
-    """)
-    List<String> findFollowing(String username);
+	List<Follow> findByIdFollowerId(Long followerId);
 
-    @Query("""
-        SELECT f.id.followerUsername
-        FROM Follow f
-        WHERE f.id.followeeUsername = :username
-    """)
-    List<String> findFollowers(String username);
+    List<Follow> findByIdFolloweeId(Long followeeId);
     
-    long countByFollowerId(Long followerId);   // How many users this user is following
+    long countByIdFollowerId(Long followerId);   // How many users this user is following
 
-    long countByFolloweeId(Long followeeId);   // How many followers this user has
+    long countByIdFolloweeId(Long followeeId);   // How many followers this user has
 }
+
 
 

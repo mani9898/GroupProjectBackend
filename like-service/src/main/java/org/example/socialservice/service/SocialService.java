@@ -1,6 +1,8 @@
 package org.example.socialservice.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.example.socialservice.entity.Follow;
 import org.example.socialservice.entity.FollowId;
@@ -48,41 +50,70 @@ public class SocialService {
 
     /* ---------- Follows ---------- */
 
-    public void follow(String me, String target) {
-        if (me.equals(target)) {
-            throw new IllegalArgumentException("Cannot follow yourself");
+    @Transactional
+    public void followUser(Long followerId, Long followeeId) {
+
+        if (followerId.equals(followeeId)) {
+            throw new IllegalArgumentException("You cannot follow yourself");
         }
 
-        FollowId id = new FollowId();
-        id.setFollowerUsername(me);
-        id.setFolloweeUsername(target);
+        // Construct composite key
+        FollowId followId = new FollowId(followerId, followeeId);
 
-        if (!followRepo.existsById(id)) {
-            followRepo.save(new Follow(me, target));
+        // Check if already following
+        if (followRepo.existsById(followId)) {
+            return; // already following, no action
+        }
+
+        // Create new Follow entity
+        Follow follow = new Follow();
+        follow.setId(followId);
+        follow.setCreatedAt(LocalDateTime.now());
+
+        followRepo.save(follow);
+    }
+
+    /**
+     * Unfollow a user
+     */
+    @Transactional
+    public void unfollowUser(Long followerId, Long followeeId) {
+
+        if (followerId.equals(followeeId)) {
+            throw new IllegalArgumentException("You cannot unfollow yourself");
+        }
+
+        FollowId followId = new FollowId(followerId, followeeId);
+
+        // Only delete if exists
+        if (followRepo.existsById(followId)) {
+            followRepo.deleteById(followId);
         }
     }
 
-    public void unfollow(String me, String target) {
-        FollowId id = new FollowId();
-        id.setFollowerUsername(me);
-        id.setFolloweeUsername(target);
-        followRepo.deleteById(id);
+ // FOLLOWERS (who follows me)
+    public List<Long> getFollowers(Long userId) {
+        return followRepo.findByIdFolloweeId(userId)
+                .stream()
+                .map(f -> f.getId().getFollowerId())
+                .collect(Collectors.toList());
     }
 
-    public List<String> followers(String username) {
-        return followRepo.findFollowers(username);
-    }
+    // FOLLOWING (who I follow)
+    public List<Long> getFollowing(Long userId) {
+    	return followRepo.findByIdFollowerId(userId)
+    	        .stream()
+    	        .map((Follow f) -> f.getId().getFolloweeId())
+    	        .collect(Collectors.toList());
 
-    public List<String> following(String username) {
-        return followRepo.findFollowing(username);
     }
     
     public long getFollowerCount(Long userId) {
-        return followRepo.countByFolloweeId(userId);
+        return followRepo.countByIdFolloweeId(userId);
     }
 
     public long getFollowingCount(Long userId) {
-        return followRepo.countByFollowerId(userId);
+        return followRepo.countByIdFollowerId(userId);
     }
 }
 

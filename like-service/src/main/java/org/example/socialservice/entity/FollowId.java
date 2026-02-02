@@ -1,36 +1,40 @@
 package org.example.socialservice.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 
 @Embeddable
 public class FollowId implements Serializable {
 
-    private String followerUsername;
-    private String followeeUsername;
+	@Column(name = "follower_id")
+    private Long followerId;
 
+    @Column(name = "followee_id")
+    private Long followeeId;
+    
     public FollowId() {
     }
     
-    public FollowId(String followerUsername, String followeeUsername) {
-    	this.followerUsername = followerUsername;
-    	this.followeeUsername = followeeUsername;
+    public FollowId(Long followerId, Long followeeId) {
+    	this.followerId = followerId;
+    	this.followeeId = followeeId;
     }
     
-    public String getFollowerUsername() {
-    	return followerUsername;
+    public Long getFollowerId() {
+    	return followerId;
     }
     
-    public void setFollowerUsername(String followerUsername) {
-    	this.followerUsername = followerUsername;
+    public void setFollowerId(Long followerId) {
+    	this.followerId = followerId;
     }
     
-    public String getFolloweeUsername() {
-    	return followeeUsername;
+    public Long getFolloweeId() {
+    	return followeeId;
     }
     
-    public void setFolloweeUsername(String followeeUsername) {
-    	this.followeeUsername = followeeUsername;
+    public void setFolloweeId(Long followeeId) {
+    	this.followeeId = followeeId;
     }
 }
 

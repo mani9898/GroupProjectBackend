@@ -13,20 +13,20 @@ public class Follow {
 
     private LocalDateTime createdAt;
 
-    public Follow(String follower, String followee) {
+    public Follow(Long followerId, Long followeeId) {
         this.id = new FollowId();
-        this.id.setFollowerUsername(follower);
-        this.id.setFolloweeUsername(followee);
+        this.id.setFollowerId(followerId);
+        this.id.setFolloweeId(followeeId);
         this.createdAt = LocalDateTime.now();
     }
 
     public Follow() {}
     
-    public FollowId getFollowId() {
+    public FollowId getId() {
     	return id;
     }
     
-    public void setFollowId(FollowId id) {
+    public void setId(FollowId id) {
     	this.id = id;
     }
     

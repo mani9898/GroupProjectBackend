@@ -2,7 +2,9 @@ package org.example.socialservice.controller;
 
 import java.util.List;
 
+import org.example.socialservice.dtos.AuthServiceClient;
 import org.example.socialservice.service.SocialService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -19,8 +21,11 @@ public class SocialController {
 
     private final SocialService service;
 
-    public SocialController(SocialService service) {
+    private final AuthServiceClient authServiceClient;
+    
+    public SocialController(SocialService service, AuthServiceClient authServiceClient) {
         this.service = service;
+        this.authServiceClient = authServiceClient;
     }
 
     private String currentUser(Jwt jwt) {
@@ -50,28 +55,30 @@ public class SocialController {
 
     /* ---------- Follows ---------- */
 
-    @PostMapping("/users/{username}/follow")
-    public ResponseEntity<Void> follow(@PathVariable String username,
-                       @AuthenticationPrincipal Jwt jwt) {
-        service.follow(currentUser(jwt), username);
+    @PostMapping("/users/{followeeId}/follow")
+    public ResponseEntity<Void> follow(@PathVariable Long followeeId, @AuthenticationPrincipal Jwt jwt) {
+    	Long followerId = authServiceClient.getUserId(jwt.getSubject());
+    	service.followUser(followerId, followeeId);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/users/{username}/follow")
-    public ResponseEntity<Void> unfollow(@PathVariable String username,
-                         @AuthenticationPrincipal Jwt jwt) {
-        service.unfollow(currentUser(jwt), username);
+    @DeleteMapping("/users/{followeeId}/follow")
+    public ResponseEntity<Void> unfollow(@PathVariable Long followeeId, @AuthenticationPrincipal Jwt jwt) {
+        Long followerId = authServiceClient.getUserId(jwt.getSubject());
+        service.unfollowUser(followerId, followeeId);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/users/{username}/followers")
-    public ResponseEntity<List<String>> followers(@PathVariable String username) {
-        return ResponseEntity.ok(service.followers(username));
+    @GetMapping("/users/{userId}/followers")
+    public ResponseEntity<List<Long>> getFollowers(@PathVariable Long userId) {
+        return ResponseEntity.ok(service.getFollowers(userId)
+       );
     }
 
-    @GetMapping("/users/{username}/following")
-    public ResponseEntity<List<String>> following(@PathVariable String username) {
-    	return ResponseEntity.ok(service.following(username));
+    @GetMapping("/users/{userId}/following")
+    public ResponseEntity<List<Long>> getFollowing(@PathVariable Long userId) {
+        return ResponseEntity.ok(service.getFollowing(userId)
+       );
     }
     
     @GetMapping("/users/{userId}/followers/count")
