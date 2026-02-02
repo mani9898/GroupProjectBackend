@@ -1,5 +1,5 @@
 server:
-  port: 9003
+  port: 9100
 
 spring:
   application:
@@ -23,7 +23,6 @@ spring:
         jwt:
           issuer-uri: http://localhost:9000
 
-# 🔗 Downstream service locations
 services:
   auth:
     base-url: http://localhost:9000
@@ -32,10 +31,10 @@ services:
   post:
     base-url: http://localhost:9002
 
-# 🔍 Debugging (optional but VERY helpful early on)
 logging:
   level:
     org.springframework.security: DEBUG
     org.springframework.web.client: DEBUG
     feign: DEBUG
+
 
