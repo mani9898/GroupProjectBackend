@@ -3,6 +3,7 @@ package org.example.socialservice.repository;
 import org.example.socialservice.entity.Follow;
 import org.example.socialservice.entity.FollowId;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -10,16 +11,23 @@ import java.util.List;
 @Repository
 public interface FollowRepository extends JpaRepository<Follow, FollowId> {
 
-    // Get all followers of a user
-    List<Follow> findByIdFolloweeId(Long followeeId);
+    @Query("""
+        SELECT f.id.followeeUsername
+        FROM Follow f
+        WHERE f.id.followerUsername = :username
+    """)
+    List<String> findFollowing(String username);
 
-    // Get all users a user is following
-    List<Follow> findByIdFollowerId(Long followerId);
+    @Query("""
+        SELECT f.id.followerUsername
+        FROM Follow f
+        WHERE f.id.followeeUsername = :username
+    """)
+    List<String> findFollowers(String username);
+    
+    long countByFollowerId(Long followerId);   // How many users this user is following
 
-    // Check if a follow relationship exists
-    boolean existsById(FollowId id);
-
-    // Delete a follow relationship
-    void deleteById(FollowId id);
+    long countByFolloweeId(Long followeeId);   // How many followers this user has
 }
+
 

@@ -3,30 +3,24 @@ package org.example.socialservice.entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
-import lombok.*;
-
-
 
 @Entity
-@Table(name = "follows", uniqueConstraints = @UniqueConstraint(columnNames = {"follower_id", "followee_id"}))
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Table(name = "follows")
 public class Follow {
 
     @EmbeddedId
     private FollowId id;
 
-    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-    
-    public Follow() {
+
+    public Follow(String follower, String followee) {
+        this.id = new FollowId();
+        this.id.setFollowerUsername(follower);
+        this.id.setFolloweeUsername(followee);
+        this.createdAt = LocalDateTime.now();
     }
-    
-    public Follow(FollowId id) {
-    	this.id = id;
-    	this.createdAt = LocalDateTime.now();
-    }
+
+    public Follow() {}
     
     public FollowId getFollowId() {
     	return id;
@@ -44,5 +38,6 @@ public class Follow {
     	this.createdAt = createdAt;
     }
 }
+
 
 

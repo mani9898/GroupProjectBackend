@@ -2,21 +2,20 @@ package org.example.socialservice.entity;
 
 import jakarta.persistence.Embeddable;
 import java.io.Serializable;
-import lombok.*;
 
 @Embeddable
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class LikeId implements Serializable {
 
-	private Long postId;
-    private Long userId;
+    private Long postId;
+    private String username;
+
+    public LikeId() {
+    }
     
-    public LikeId(Long postId, Long userId) {
-		this.postId = postId;
-		this.userId = userId;
-	}
+    public LikeId(Long postId, String username) {
+    	this.postId = postId;
+    	this.username = username;
+    }
     
     public Long getPostId() {
     	return postId;
@@ -26,12 +25,13 @@ public class LikeId implements Serializable {
     	this.postId = postId;
     }
     
-    public Long getUserId() {
-    	return userId;
+    public String getUsername() {
+    	return username;
     }
     
-    public void setUserId(Long userId) {
-    	this.userId = userId;
+    public void setUsername(String username) {
+    	this.username = username;
     }
 }
+
 

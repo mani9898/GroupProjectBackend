@@ -1,0 +1,22 @@
+server:
+  port: 9100   
+
+spring:
+  datasource:
+    url: "jdbc:postgresql://localhost:5432/social_service_db"
+    username: "postgres"
+    password: "tom4wolf"
+    driver-class-name: "org.postgresql.Driver"
+
+  jpa:
+    database-platform: "org.hibernate.dialect.PostgreSQLDialect"
+    hibernate:
+      ddl-auto: update   
+    show-sql: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "http://localhost:9000"   
+

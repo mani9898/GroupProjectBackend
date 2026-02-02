@@ -1,31 +1,26 @@
 package org.example.socialservice.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "likes", uniqueConstraints = @UniqueConstraint(columnNames = {"post_id", "user_id"}))
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Table(name = "likes")
 public class Like {
 
     @EmbeddedId
     private LikeId id;
 
-    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
-    
-    public Like() {
+
+    public Like(Long postId, String username) {
+        this.id = new LikeId();
+        this.id.setPostId(postId);
+        this.id.setUsername(username);
+        this.createdAt = LocalDateTime.now();
     }
-    
-    public Like(LikeId id) {
-    	this.id = id;
-    	this.createdAt = LocalDateTime.now();
-    }
+
+    public Like() {}
     
     public LikeId getLikeId() {
     	return id;
@@ -43,4 +38,5 @@ public class Like {
     	this.createdAt = createdAt;
     }
 }
+
 
