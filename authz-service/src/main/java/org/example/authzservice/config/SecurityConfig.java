@@ -22,7 +22,7 @@ public class SecurityConfig {
                         auth.requestMatchers(
                                         "/api/users/register",
                                         "/api/users/login",
-                                        "/api/internal/backEndToBack/follower",
+                                        "/api/internal/**",
                                         "/.well-known/jwks.json",
                                         "/.well-known/openid-configuration"
                                 ).permitAll()

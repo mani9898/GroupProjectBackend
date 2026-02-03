@@ -133,17 +133,18 @@ public class SocialMediaUserService {
         return Map.of("token", token);
     }
 
-public ResponseInternalCheck getMediaUser(String username) {
+public boolean getMediaUser(String username) {
     if (username == null || username.isBlank()) {
-        throw new FollowerNotFound("USERNAME_MISSING");
+        return false;
+
     }
 
     MediaUser mediaUser = socialMediaUserRepository.findByUsername(username);
     if (mediaUser == null) {
-        throw new FollowerNotFound("USER_NOT_FOUND");
+        return false;
     }
 
-    return new ResponseInternalCheck(mediaUser.getUsername(), mediaUser.getStatus(), mediaUser.getLoggedIn());
+    return true;
 }
 
 }
