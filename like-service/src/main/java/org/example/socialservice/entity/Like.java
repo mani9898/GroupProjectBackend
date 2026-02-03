@@ -1,42 +1,57 @@
 package org.example.socialservice.entity;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "likes")
 public class Like {
 
-    @EmbeddedId
-    private LikeId id;
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+	
+	@Column(name = "post_id", unique = true, nullable = false)
+	private Long postId;
+	
+	@Column(name = "username", unique = true, nullable = false)
+	private String username;
 
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    public Like() {}
+
     public Like(Long postId, String username) {
-        this.id = new LikeId();
-        this.id.setPostId(postId);
-        this.id.setUsername(username);
+        this.postId  = postId;
+        this.username = username;
         this.createdAt = LocalDateTime.now();
     }
 
-    public Like() {}
-    
-    public LikeId getLikeId() {
-    	return id;
+    public Long getPostId() {
+    	return postId;
     }
     
-    public void setLikeId(LikeId id) {
-    	this.id = id;
+    public void setPostId(Long postId) {
+    	this.postId = postId;
     }
     
+    public String getUsername() {
+    	return username;
+    }
+    
+    public void setUsername(String username) {
+    	this.username = username;
+    }
+
     public LocalDateTime getCreatedAt() {
-    	return createdAt;
+        return createdAt;
     }
-    
+
     public void setCreatedAt(LocalDateTime createdAt) {
-    	this.createdAt = createdAt;
+        this.createdAt = createdAt;
     }
 }
+
 
 

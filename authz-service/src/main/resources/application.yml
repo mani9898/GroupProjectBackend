@@ -13,14 +13,14 @@ security:
   jwt:
     key-store:
       location: "classpath:keystore.jks"
-      password: ""
+      password: "Tarmeen"
       alias: "certificate"
 
 spring:
   datasource:
     url: "jdbc:postgresql://localhost:5432/postgres"
     username: "postgres"
-    password: ""
+    password: 
     driver-class-name: "org.postgresql.Driver"
 
   jpa:
