@@ -19,7 +19,7 @@ public class CallerService {
             ResponseEntity<Void> response =
                     client.checkUserFollower(followerUsername);
 
-            return response.getStatusCode().is2xxSuccessful();
+            return response.getStatusCode().is2xxSuccessful(); // return true if follower
         } catch (FeignException.NotFound e) {
             return false; // not a follower
         }

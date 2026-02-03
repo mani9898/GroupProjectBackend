@@ -11,10 +11,10 @@ public class Like {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 	
-	@Column(name = "post_id", unique = true, nullable = false)
+	@Column(name = "post_id", nullable = false)
 	private Long postId;
 	
-	@Column(name = "username", unique = true, nullable = false)
+	@Column(name = "username", nullable = false)
 	private String username;
 
     @Column(nullable = false)
@@ -28,20 +28,28 @@ public class Like {
         this.createdAt = LocalDateTime.now();
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Long getPostId() {
-    	return postId;
+        return postId;
     }
-    
+
     public void setPostId(Long postId) {
-    	this.postId = postId;
+        this.postId = postId;
     }
-    
+
     public String getUsername() {
-    	return username;
+        return username;
     }
-    
+
     public void setUsername(String username) {
-    	this.username = username;
+        this.username = username;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -2,9 +2,14 @@ package org.example.socialservice.controller;
 
 import org.example.socialservice.entity.Follow;
 import org.example.socialservice.entity.Like;
+import org.example.socialservice.exceptions.DuplicateFollowException;
 import org.example.socialservice.service.SocialService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.example.socialservice.config.CallerService;
 import java.util.List;
@@ -25,20 +30,32 @@ public class SocialController {
 
 
     // Follow user
-    @PostMapping("/follow/{personFollowing}/{personBeingFollowed}")
-    public ResponseEntity<Follow> followUser(@PathVariable String personFollowing, @PathVariable String personBeingFollowed) {
-    	Follow follow = new Follow();
-    	if (callerService.isFollower(personFollowing)) {
-    		 follow = socialService.followUser(personFollowing, personBeingFollowed);
-    	} else {
-    		return ResponseEntity.status(403).build();
-    	}
-        return ResponseEntity.ok(follow);
+    @PostMapping("/follow/{personBeingFollowed}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Follow> followUser(@PathVariable String personBeingFollowed, @AuthenticationPrincipal Jwt jwt) {
+        String follower = jwt.getSubject();
+
+        if(follower.equals(personBeingFollowed)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // 400 for self-follow
+        }
+
+        if (!callerService.isFollower(personBeingFollowed)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404 if user to be followed does not exist
+        }
+
+        try {
+            Follow follow = socialService.followUser(follower, personBeingFollowed);
+            return ResponseEntity.ok(follow);
+        } catch (DuplicateFollowException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build(); // explain conflict to client
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     // Get followers of username
     @GetMapping("/followers/{username}")
-    public List<Follow> getFollowers(@PathVariable("username") String user) {
+    public List<Follow> getFollowers(@PathVariable("username") String user) throws Exception {
         return socialService.getFollowers(user);
     }
 

@@ -12,3 +12,8 @@ CREATE TABLE follows (
   PRIMARY KEY (follower_username, followee_username),
   CHECK (follower_username <> followee_username)
 );
+
+drop table if exists follows;
+drop table if exists likes;
+
+select * from follows;

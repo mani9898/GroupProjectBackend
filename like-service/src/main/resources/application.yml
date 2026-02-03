@@ -6,16 +6,15 @@ spring:
     name: like-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/social_service_db
-    username: postgres
-    password: 
-    driver-class-name: org.postgresql.Driver
+    url: "jdbc:postgresql://localhost:5432/postgres"
+    username: "postgres"
+    password: ""
+    driver-class-name: "org.postgresql.Driver"
 
   jpa:
+    database-platform: "org.hibernate.dialect.PostgreSQLDialect"
     hibernate:
       ddl-auto: update
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
 
   security:
     oauth2:
