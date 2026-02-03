@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/profiles")
+@CrossOrigin(origins = "*")
 public class ProfileController {
     private ProfileService profileService;
 
@@ -19,9 +20,9 @@ public class ProfileController {
         this.profileService = profileService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ProfileDto> getProfile(@PathVariable Long id) {
-        Profile profile = profileService.getProfileById(id);
+    @GetMapping("/{username}")
+    public ResponseEntity<ProfileDto> getProfile(@PathVariable String username) {
+        Profile profile = profileService.getByUsername(username);
         ProfileDto profileDto = new ProfileDto(profile.getId(),
                 profile.getUsername(), profile.getAboutMe(), profile.getDisplayName(),
                 profile.getProfilePictureUrl(), profile.getLocation(), profile.getBirthdate(),
