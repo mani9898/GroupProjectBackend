@@ -97,6 +97,13 @@ public class SocialController {
     	Like like = socialService.likePost(postId, username);
         return ResponseEntity.ok(like);
     }
+    
+    // Unlike a user's post
+    @DeleteMapping("/like/{postId}/{username}")
+    public ResponseEntity<HttpStatus> unlikePost(@PathVariable Long postId, @PathVariable String username) {
+    	socialService.unlikePost(postId, username);
+    	return ResponseEntity.noContent().build();
+    }
 
     // Get likes for post with postId = {postId}
     @GetMapping("/likes/post/{postId}")
