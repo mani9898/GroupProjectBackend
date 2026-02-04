@@ -39,21 +39,6 @@ public class SocialService {
             throw new Exception("Error while following user: " + e.getMessage(), e);
         }
     }
-    
-    public void unfollowUser(String personUnfollowing, String personBeingUnfollowed) throws Exception {
-        // check explicitly with correct parameter order: follower, user
-        if (!followRepository.existsByFollowerAndUser(personUnfollowing, personBeingUnfollowed)) {
-            throw new DuplicateFollowException("User " + personUnfollowing + " does not follow " + personBeingUnfollowed);
-        }
-       
-        try {
-        	followRepository.deleteByFollowerUsernameAndFolloweeUsername(personUnfollowing, personBeingUnfollowed);
-        } catch (DataIntegrityViolationException ex) {
-            throw new DuplicateFollowException("Duplicate unfollow attempt for follower: " + personUnfollowing, ex);
-        } catch (Exception e) {
-            throw new Exception("Error while unfollowing user: " + e.getMessage(), e);
-        }
-    }
 
 
     public List<Follow> getFollowers(String user) throws Exception {
@@ -86,4 +71,20 @@ public class SocialService {
     public List<Like> getLikesByUser(String username) {
         return likeRepository.findByUsername(username);
     }
+
+    public void unfollowUser(String personUnfollowing, String personBeingUnfollowed) throws Exception {
+		// check explicitly with correct parameter order: follower, user
+        if (!followRepository.existsByFollowerAndUser(personUnfollowing, personBeingUnfollowed)) {
+            throw new DuplicateFollowException("User " + personUnfollowing + " does not follow " + personBeingUnfollowed);
+        }
+        
+        Follow follow = new Follow(personBeingUnfollowed, personUnfollowing);
+        try {
+        	followRepository.delete(follow);
+        } catch (DataIntegrityViolationException ex) {
+            throw new DuplicateFollowException("Duplicate unfollow attempt for follower: " + personUnfollowing, ex);
+        } catch (Exception e) {
+            throw new Exception("Error while unfollowing user: " + e.getMessage(), e);
+        }
+	}
 }

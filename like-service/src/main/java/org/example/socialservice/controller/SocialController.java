@@ -76,7 +76,7 @@ public class SocialController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
-
+    
     // Get followers of username
     @GetMapping("/followers/{username}")
     public ResponseEntity<List<Follow>> getFollowers(@PathVariable("username") String user) throws Exception {
