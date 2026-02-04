@@ -4,6 +4,7 @@ package org.example.socialservice.service;
 import org.example.socialservice.entity.Follow;
 import org.example.socialservice.entity.Like;
 import org.example.socialservice.exceptions.DuplicateFollowException;
+import org.example.socialservice.exceptions.LikeNotFoundException;
 import org.example.socialservice.repository.FollowRepository;
 import org.example.socialservice.repository.LikeRepository;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -38,7 +39,7 @@ public class SocialService {
             throw new Exception("Error while following user: " + e.getMessage(), e);
         }
     }
-
+    
     public void unfollowUser(String personUnfollowing, String personBeingUnfollowed) throws Exception {
         // check explicitly with correct parameter order: follower, user
         if (!followRepository.existsByFollowerAndUser(personUnfollowing, personBeingUnfollowed)) {
@@ -54,6 +55,7 @@ public class SocialService {
         }
     }
 
+
     public List<Follow> getFollowers(String user) throws Exception {
         List<Follow> followers = followRepository.findByUser(user);
         return followers;
@@ -66,6 +68,15 @@ public class SocialService {
     public Like likePost(Long postId, String username) {
         Like like = new Like(postId, username);
         return likeRepository.save(like);
+    }
+    
+    public void unlikePost(Long postId, String username) {
+    	
+        if (!likeRepository.existsByPostIdAndUsername(postId, username)) {
+            throw new LikeNotFoundException("You have not liked this post");
+        }
+        
+        likeRepository.deleteByPostIdAndUsername(postId, username);
     }
 
     public List<Like> getLikesForPost(Long postId) {
