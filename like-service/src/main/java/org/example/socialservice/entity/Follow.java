@@ -5,37 +5,71 @@ import java.time.LocalDateTime;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "follows")
+@Table(
+        name = "follows",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"follower_username", "followee_username"})
+        })
 public class Follow {
-
-    @EmbeddedId
-    private FollowId id;
-
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(name = "followee_username", nullable = false)
+    private String user;
+    @Column(name = "follower_username", nullable = false)
+    private String follower;
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
-
-    public Follow(Long followerId, Long followeeId) {
-        this.id = new FollowId();
-        this.id.setFollowerId(followerId);
-        this.id.setFolloweeId(followeeId);
-        this.createdAt = LocalDateTime.now();
+    
+    public Follow() {
+    }
+    
+    public Follow(String user, String follower) {
+    	this.user = user;
+    	this.follower = follower;
+    	this.createdAt = LocalDateTime.now();
     }
 
-    public Follow() {}
-    
-    public FollowId getId() {
-    	return id;
+    public Long getId() {
+        return id;
     }
-    
-    public void setId(FollowId id) {
-    	this.id = id;
+
+    public void setId(Long id) {
+        this.id = id;
     }
-    
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getFollower() {
+        return follower;
+    }
+
+    public void setFollower(String follower) {
+        this.follower = follower;
+    }
+
     public LocalDateTime getCreatedAt() {
-    	return createdAt;
+        return createdAt;
     }
-    
+
     public void setCreatedAt(LocalDateTime createdAt) {
-    	this.createdAt = createdAt;
+        this.createdAt = createdAt;
+    }
+
+    @Override
+    public String toString() {
+        return "Follow{" +
+                "id=" + id +
+                ", user='" + user + '\'' +
+                ", follower='" + follower + '\'' +
+                ", createdAt=" + createdAt +
+                '}';
     }
 }
 
