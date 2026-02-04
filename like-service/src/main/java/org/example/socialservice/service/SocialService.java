@@ -73,7 +73,6 @@ public class SocialService {
     }
 
     public void unfollowUser(String personUnfollowing, String personBeingUnfollowed) throws Exception {
-		// TODO Auto-generated method stub
 		// check explicitly with correct parameter order: follower, user
         if (!followRepository.existsByFollowerAndUser(personUnfollowing, personBeingUnfollowed)) {
             throw new DuplicateFollowException("User " + personUnfollowing + " does not follow " + personBeingUnfollowed);
