@@ -55,31 +55,36 @@ public class SocialController {
 
     // Get followers of username
     @GetMapping("/followers/{username}")
-    public List<Follow> getFollowers(@PathVariable("username") String user) throws Exception {
-        return socialService.getFollowers(user);
+    public ResponseEntity<List<Follow>> getFollowers(@PathVariable("username") String user) throws Exception {
+    	List<Follow> followers = socialService.getFollowers(user);
+        return ResponseEntity.ok(followers);
     }
 
     // Get who the user is following
     @GetMapping("/following/{username}")
-    public List<Follow> getFollowing(@PathVariable("username") String follower) {
-        return socialService.getFollowing(follower);
+    public ResponseEntity<List<Follow>> getFollowing(@PathVariable("username") String follower) {
+    	List<Follow> following = socialService.getFollowing(follower);
+        return ResponseEntity.ok(following);
     }
 
     // Post a like on a user's post
     @PostMapping("/like/{postId}/{username}")
-    public Like likePost(@PathVariable Long postId, @PathVariable String username) {
-        return socialService.likePost(postId, username);
+    public ResponseEntity<Like> likePost(@PathVariable Long postId, @PathVariable String username) {
+    	Like like = socialService.likePost(postId, username);
+        return ResponseEntity.ok(like);
     }
 
     // Get likes for post with postId = {postId}
     @GetMapping("/likes/post/{postId}")
-    public List<Like> getLikesForPost(@PathVariable Long postId) {
-        return socialService.getLikesForPost(postId);
+    public ResponseEntity<List<Like>> getLikesForPost(@PathVariable Long postId) {
+    	List<Like> likes = socialService.getLikesForPost(postId);
+        return ResponseEntity.ok(likes);
     }
 
     // Get total likes for user
     @GetMapping("/likes/user/{username}")
-    public List<Like> getLikesByUser(@PathVariable String username) {
-        return socialService.getLikesByUser(username);
+    public ResponseEntity<List<Like>> getLikesByUser(@PathVariable String username) {
+    	List<Like> userLikes = socialService.getLikesByUser(username);
+        return ResponseEntity.ok(userLikes);
     }
 }
