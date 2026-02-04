@@ -1,23 +1,17 @@
 package org.example.socialservice.repository;
 
 import org.example.socialservice.entity.Follow;
-import org.example.socialservice.entity.FollowId;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 
-@Repository
-public interface FollowRepository extends JpaRepository<Follow, FollowId> {
+public interface FollowRepository extends JpaRepository<Follow, Long> {
+    List<Follow> findByUser(String user);        // who follows this user
+    List<Follow> findByFollower(String follower); // who this user follows
 
-	List<Follow> findByIdFollowerId(Long followerId);
+    boolean existsByFollowerAndUser(String personFollowing, String personBeingFollowed);
 
-    List<Follow> findByIdFolloweeId(Long followeeId);
-    
-    long countByIdFollowerId(Long followerId);   // How many users this user is following
+    void deleteByFollowerUsernameAndFolloweeUsername(String followerUsername, String followeeUsername);
 
-    long countByIdFolloweeId(Long followeeId);   // How many followers this user has
 }
 
 

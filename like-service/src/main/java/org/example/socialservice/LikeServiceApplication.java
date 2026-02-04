@@ -6,10 +6,9 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableFeignClients
-public class SocialServiceApplication {
+public class LikeServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SocialServiceApplication.class, args);
+        SpringApplication.run(LikeServiceApplication.class, args);
     }
-
 }

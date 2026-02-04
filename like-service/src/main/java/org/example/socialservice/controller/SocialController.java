@@ -1,94 +1,121 @@
 package org.example.socialservice.controller;
 
-import java.util.List;
-
-import org.example.socialservice.dtos.AuthServiceClient;
+import org.example.socialservice.entity.Follow;
+import org.example.socialservice.entity.Like;
+import org.example.socialservice.exceptions.DuplicateFollowException;
 import org.example.socialservice.service.SocialService;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.example.socialservice.config.CallerService;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/social")
 public class SocialController {
 
-    private final SocialService service;
-
-    private final AuthServiceClient authServiceClient;
+    private final SocialService socialService;
     
-    public SocialController(SocialService service, AuthServiceClient authServiceClient) {
-        this.service = service;
-        this.authServiceClient = authServiceClient;
+    @Autowired
+    private final CallerService callerService;
+
+    public SocialController(SocialService socialService, CallerService callerService) {
+        this.socialService = socialService;
+        this.callerService = callerService;
     }
 
-    private String currentUser(Jwt jwt) {
-        return jwt.getSubject(); // username
+
+    // Follow user
+    @PostMapping("/follow/{personBeingFollowed}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Follow> followUser(@PathVariable String personBeingFollowed, @AuthenticationPrincipal Jwt jwt) {
+        String follower = jwt.getSubject();
+
+        if(follower.equals(personBeingFollowed)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // 400 for self-follow
+        }
+
+        if (!callerService.isFollower(personBeingFollowed)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404 if user to be followed does not exist
+        }
+
+        try {
+            Follow follow = socialService.followUser(follower, personBeingFollowed);
+            return ResponseEntity.ok(follow);
+        } catch (DuplicateFollowException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build(); // explain conflict to client
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
-    /* ---------- Likes ---------- */
+    // Unfollow user
+    @DeleteMapping("/follow/{personBeingUnfollowed}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<HttpStatus> unfollowUser(@PathVariable String personBeingUnfollowed, @AuthenticationPrincipal Jwt jwt) {
+        String follower = jwt.getSubject();
 
-    @PostMapping("/posts/{postId}/like")
-    public ResponseEntity<Void> like(@PathVariable Long postId,
-                     @AuthenticationPrincipal Jwt jwt) {
-        service.likePost(postId, currentUser(jwt));
-        return ResponseEntity.ok().build();
+        if(follower.equals(personBeingUnfollowed)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // 400 for self-unfollow
+        }
+
+        if (!callerService.isFollower(personBeingUnfollowed)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404 if user to be unfollowed does not exist
+        }
+
+        try {
+        	socialService.unfollowUser(follower, personBeingUnfollowed);
+            return ResponseEntity.noContent().build();
+        } catch (DuplicateFollowException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build(); // explain conflict to client
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
-    @DeleteMapping("/posts/{postId}/like")
-    public ResponseEntity<Void> unlike(@PathVariable Long postId,
-                       @AuthenticationPrincipal Jwt jwt) {
-        service.unlikePost(postId, currentUser(jwt));
-        return ResponseEntity.noContent().build();
+    // Get followers of username
+    @GetMapping("/followers/{username}")
+    public ResponseEntity<List<Follow>> getFollowers(@PathVariable("username") String user) throws Exception {
+    	List<Follow> followers = socialService.getFollowers(user);
+        return ResponseEntity.ok(followers);
     }
 
-    @GetMapping("/posts/{postId}/likes/count")
-    public ResponseEntity<Long> count(@PathVariable Long postId) {
-        return ResponseEntity.ok(service.likeCount(postId));
+    // Get who the user is following
+    @GetMapping("/following/{username}")
+    public ResponseEntity<List<Follow>> getFollowing(@PathVariable("username") String follower) {
+    	List<Follow> following = socialService.getFollowing(follower);
+        return ResponseEntity.ok(following);
     }
 
-    /* ---------- Follows ---------- */
-
-    @PostMapping("/users/{followeeId}/follow")
-    public ResponseEntity<Void> follow(@PathVariable Long followeeId, @AuthenticationPrincipal Jwt jwt) {
-    	Long followerId = authServiceClient.getUserId(jwt.getSubject());
-    	service.followUser(followerId, followeeId);
-        return ResponseEntity.ok().build();
-    }
-
-    @DeleteMapping("/users/{followeeId}/follow")
-    public ResponseEntity<Void> unfollow(@PathVariable Long followeeId, @AuthenticationPrincipal Jwt jwt) {
-        Long followerId = authServiceClient.getUserId(jwt.getSubject());
-        service.unfollowUser(followerId, followeeId);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/users/{userId}/followers")
-    public ResponseEntity<List<Long>> getFollowers(@PathVariable Long userId) {
-        return ResponseEntity.ok(service.getFollowers(userId)
-       );
-    }
-
-    @GetMapping("/users/{userId}/following")
-    public ResponseEntity<List<Long>> getFollowing(@PathVariable Long userId) {
-        return ResponseEntity.ok(service.getFollowing(userId)
-       );
+    // Post a like on a user's post
+    @PostMapping("/like/{postId}/{username}")
+    public ResponseEntity<Like> likePost(@PathVariable Long postId, @PathVariable String username) {
+    	Like like = socialService.likePost(postId, username);
+        return ResponseEntity.ok(like);
     }
     
-    @GetMapping("/users/{userId}/followers/count")
-    public ResponseEntity<Long> getFollowerCount(@PathVariable Long userId) {
-        return ResponseEntity.ok(service.getFollowerCount(userId));
+    // Unlike a user's post
+    @DeleteMapping("/like/{postId}/{username}")
+    public ResponseEntity<HttpStatus> unlikePost(@PathVariable Long postId, @PathVariable String username) {
+    	socialService.unlikePost(postId, username);
+    	return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/users/{userId}/following/count")
-    public ResponseEntity<Long> getFollowingCount(@PathVariable Long userId) {
-    	return ResponseEntity.ok(service.getFollowingCount(userId));
+    // Get likes for post with postId = {postId}
+    @GetMapping("/likes/post/{postId}")
+    public ResponseEntity<List<Like>> getLikesForPost(@PathVariable Long postId) {
+    	List<Like> likes = socialService.getLikesForPost(postId);
+        return ResponseEntity.ok(likes);
+    }
+
+    // Get total likes for user
+    @GetMapping("/likes/user/{username}")
+    public ResponseEntity<List<Like>> getLikesByUser(@PathVariable String username) {
+    	List<Like> userLikes = socialService.getLikesByUser(username);
+        return ResponseEntity.ok(userLikes);
     }
 }
-

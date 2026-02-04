@@ -1,119 +1,89 @@
+// java
 package org.example.socialservice.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.example.socialservice.entity.Follow;
-import org.example.socialservice.entity.FollowId;
 import org.example.socialservice.entity.Like;
-import org.example.socialservice.entity.LikeId;
+import org.example.socialservice.exceptions.DuplicateFollowException;
+import org.example.socialservice.exceptions.LikeNotFoundException;
 import org.example.socialservice.repository.FollowRepository;
 import org.example.socialservice.repository.LikeRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
 @Service
-@Transactional
 public class SocialService {
 
-    private final LikeRepository likeRepo;
-    private final FollowRepository followRepo;
+    private final FollowRepository followRepository;
+    private final LikeRepository likeRepository;
 
-    public SocialService(LikeRepository likeRepo, FollowRepository followRepo) {
-        this.likeRepo = likeRepo;
-        this.followRepo = followRepo;
+    public SocialService(FollowRepository followRepository, LikeRepository likeRepository) {
+        this.followRepository = followRepository;
+        this.likeRepository = likeRepository;
     }
 
-    /* ---------- Likes ---------- */
-
-    public void likePost(Long postId, String username) {
-        LikeId id = new LikeId();
-        id.setPostId(postId);
-        id.setUsername(username);
-
-        if (!likeRepo.existsById(id)) {
-            likeRepo.save(new Like(postId, username));
-        }
-    }
-
-    public void unlikePost(Long postId, String username) {
-        LikeId id = new LikeId();
-        id.setPostId(postId);
-        id.setUsername(username);
-        likeRepo.deleteById(id);
-    }
-
-    public long likeCount(Long postId) {
-        return likeRepo.countByIdPostId(postId);
-    }
-
-    /* ---------- Follows ---------- */
-
-    @Transactional
-    public void followUser(Long followerId, Long followeeId) {
-
-        if (followerId.equals(followeeId)) {
-            throw new IllegalArgumentException("You cannot follow yourself");
+    public Follow followUser(String personFollowing, String personBeingFollowed) throws Exception {
+        // check explicitly with correct parameter order: follower, user
+        if (followRepository.existsByFollowerAndUser(personFollowing, personBeingFollowed)) {
+            throw new DuplicateFollowException("User " + personFollowing + " already follows " + personBeingFollowed);
         }
 
-        // Construct composite key
-        FollowId followId = new FollowId(followerId, followeeId);
+        // construct Follow(user, follower) -> (personBeingFollowed, personFollowing)
+        Follow follow = new Follow(personBeingFollowed, personFollowing);
 
-        // Check if already following
-        if (followRepo.existsById(followId)) {
-            return; // already following, no action
+        try {
+            return followRepository.save(follow);
+        } catch (DataIntegrityViolationException ex) {
+            throw new DuplicateFollowException("Duplicate follow attempt for follower: " + personFollowing, ex);
+        } catch (Exception e) {
+            throw new Exception("Error while following user: " + e.getMessage(), e);
         }
-
-        // Create new Follow entity
-        Follow follow = new Follow();
-        follow.setId(followId);
-        follow.setCreatedAt(LocalDateTime.now());
-
-        followRepo.save(follow);
-    }
-
-    /**
-     * Unfollow a user
-     */
-    @Transactional
-    public void unfollowUser(Long followerId, Long followeeId) {
-
-        if (followerId.equals(followeeId)) {
-            throw new IllegalArgumentException("You cannot unfollow yourself");
-        }
-
-        FollowId followId = new FollowId(followerId, followeeId);
-
-        // Only delete if exists
-        if (followRepo.existsById(followId)) {
-            followRepo.deleteById(followId);
-        }
-    }
-
- // FOLLOWERS (who follows me)
-    public List<Long> getFollowers(Long userId) {
-        return followRepo.findByIdFolloweeId(userId)
-                .stream()
-                .map(f -> f.getId().getFollowerId())
-                .collect(Collectors.toList());
-    }
-
-    // FOLLOWING (who I follow)
-    public List<Long> getFollowing(Long userId) {
-    	return followRepo.findByIdFollowerId(userId)
-    	        .stream()
-    	        .map((Follow f) -> f.getId().getFolloweeId())
-    	        .collect(Collectors.toList());
-
     }
     
-    public long getFollowerCount(Long userId) {
-        return followRepo.countByIdFolloweeId(userId);
+    public void unfollowUser(String personUnfollowing, String personBeingUnfollowed) throws Exception {
+        // check explicitly with correct parameter order: follower, user
+        if (!followRepository.existsByFollowerAndUser(personUnfollowing, personBeingUnfollowed)) {
+            throw new DuplicateFollowException("User " + personUnfollowing + " does not follow " + personBeingUnfollowed);
+        }
+       
+        try {
+        	followRepository.deleteByFollowerUsernameAndFolloweeUsername(personUnfollowing, personBeingUnfollowed);
+        } catch (DataIntegrityViolationException ex) {
+            throw new DuplicateFollowException("Duplicate unfollow attempt for follower: " + personUnfollowing, ex);
+        } catch (Exception e) {
+            throw new Exception("Error while unfollowing user: " + e.getMessage(), e);
+        }
     }
 
-    public long getFollowingCount(Long userId) {
-        return followRepo.countByIdFollowerId(userId);
+
+    public List<Follow> getFollowers(String user) throws Exception {
+        List<Follow> followers = followRepository.findByUser(user);
+        return followers;
+    }
+
+    public List<Follow> getFollowing(String follower) {
+        return followRepository.findByFollower(follower);
+    }
+
+    public Like likePost(Long postId, String username) {
+        Like like = new Like(postId, username);
+        return likeRepository.save(like);
+    }
+    
+    public void unlikePost(Long postId, String username) {
+    	
+        if (!likeRepository.existsByPostIdAndUsername(postId, username)) {
+            throw new LikeNotFoundException("You have not liked this post");
+        }
+        
+        likeRepository.deleteByPostIdAndUsername(postId, username);
+    }
+
+    public List<Like> getLikesForPost(Long postId) {
+        return likeRepository.findByPostId(postId);
+    }
+
+    public List<Like> getLikesByUser(String username) {
+        return likeRepository.findByUsername(username);
     }
 }
-
