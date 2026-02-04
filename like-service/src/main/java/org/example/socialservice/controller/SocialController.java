@@ -53,30 +53,6 @@ public class SocialController {
         }
     }
 
-    // Unfollow user
-    @DeleteMapping("/follow/{personBeingUnfollowed}")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<HttpStatus> unfollowUser(@PathVariable String personBeingUnfollowed, @AuthenticationPrincipal Jwt jwt) {
-        String follower = jwt.getSubject();
-
-        if(follower.equals(personBeingUnfollowed)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // 400 for self-unfollow
-        }
-
-        if (!callerService.isFollower(personBeingUnfollowed)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404 if user to be unfollowed does not exist
-        }
-
-        try {
-        	socialService.unfollowUser(follower, personBeingUnfollowed);
-            return ResponseEntity.noContent().build();
-        } catch (DuplicateFollowException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build(); // explain conflict to client
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-    }
-
     // Get followers of username
     @GetMapping("/followers/{username}")
     public ResponseEntity<List<Follow>> getFollowers(@PathVariable("username") String user) throws Exception {
