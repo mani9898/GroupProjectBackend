@@ -30,21 +30,21 @@ public class SocialController {
 
 
     // Follow user
-    @PostMapping("/follow/{personBeingFollowed}")
+    @PostMapping("/follow/{followeeUsername}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<Follow> followUser(@PathVariable String personBeingFollowed, @AuthenticationPrincipal Jwt jwt) {
-        String follower = jwt.getSubject();
+    public ResponseEntity<Follow> followUser(@PathVariable String followeeUsername, @AuthenticationPrincipal Jwt jwt) {
+        String followerUsername = jwt.getSubject();
 
-        if(follower.equals(personBeingFollowed)) {
+        if(followerUsername.equals(followeeUsername)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // 400 for self-follow
         }
 
-        if (!callerService.isFollower(personBeingFollowed)) {
+        if (!callerService.isFollower(followeeUsername)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404 if user to be followed does not exist
         }
 
         try {
-            Follow follow = socialService.followUser(follower, personBeingFollowed);
+            Follow follow = socialService.followUser(followerUsername, followeeUsername);
             return ResponseEntity.ok(follow);
         } catch (DuplicateFollowException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build(); // explain conflict to client
@@ -52,23 +52,23 @@ public class SocialController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
-
+	 
     // Unfollow user
-    @DeleteMapping("/follow/{personBeingUnfollowed}")
+    @DeleteMapping("/follow/{followeeUsername}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<HttpStatus> unfollowUser(@PathVariable String personBeingUnfollowed, @AuthenticationPrincipal Jwt jwt) {
-        String follower = jwt.getSubject();
+    public ResponseEntity<HttpStatus> unfollowUser(@PathVariable String followeeUsername, @AuthenticationPrincipal Jwt jwt) {
+        String followerUsername = jwt.getSubject();
 
-        if(follower.equals(personBeingUnfollowed)) {
+        if(followerUsername.equals(followeeUsername)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // 400 for self-unfollow
         }
 
-        if (!callerService.isFollower(personBeingUnfollowed)) {
+        if (!callerService.isFollower(followeeUsername)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404 if user to be unfollowed does not exist
         }
 
         try {
-        	socialService.unfollowUser(follower, personBeingUnfollowed);
+        	socialService.unfollowUser(followerUsername, followeeUsername);
             return ResponseEntity.noContent().build();
         } catch (DuplicateFollowException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build(); // explain conflict to client
@@ -76,18 +76,18 @@ public class SocialController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
-    
+
     // Get followers of username
     @GetMapping("/followers/{username}")
-    public ResponseEntity<List<Follow>> getFollowers(@PathVariable("username") String user) throws Exception {
-    	List<Follow> followers = socialService.getFollowers(user);
+    public ResponseEntity<List<String>> getFollowers(@PathVariable("username") String username) throws Exception {
+    	List<String> followers = socialService.getFollowers(username);
         return ResponseEntity.ok(followers);
     }
 
     // Get who the user is following
     @GetMapping("/following/{username}")
-    public ResponseEntity<List<Follow>> getFollowing(@PathVariable("username") String follower) {
-    	List<Follow> following = socialService.getFollowing(follower);
+    public ResponseEntity<List<String>> getFollowing(@PathVariable("username") String username) {
+    	List<String> following = socialService.getFollowing(username);
         return ResponseEntity.ok(following);
     }
 
@@ -111,11 +111,27 @@ public class SocialController {
     	List<Like> likes = socialService.getLikesForPost(postId);
         return ResponseEntity.ok(likes);
     }
+    
+    // Get number of likes for post with postId = {postId}
+    @GetMapping("/likes/post/{postId}/count")
+    public ResponseEntity<Integer> getLikesCountForPost(@PathVariable Long postId) {
+    	List<Like> likes = socialService.getLikesForPost(postId);
+    	int numLikes = likes.size();
+        return ResponseEntity.ok(numLikes);
+    }
 
     // Get total likes for user
     @GetMapping("/likes/user/{username}")
     public ResponseEntity<List<Like>> getLikesByUser(@PathVariable String username) {
     	List<Like> userLikes = socialService.getLikesByUser(username);
         return ResponseEntity.ok(userLikes);
+    }
+    
+    // Get total number of likes for user
+    @GetMapping("/likes/user/{username}/count")
+    public ResponseEntity<Integer> getLikesCountByUser(@PathVariable String username) {
+    	List<Like> userLikes = socialService.getLikesByUser(username);
+    	int numUserLikes = userLikes.size();
+        return ResponseEntity.ok(numUserLikes);
     }
 }
