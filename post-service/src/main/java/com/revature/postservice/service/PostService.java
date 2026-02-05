@@ -3,6 +3,7 @@ package com.revature.postservice.service;
 import com.revature.postservice.dto.CreatePostRequest;
 import com.revature.postservice.dto.PostResponse;
 import com.revature.postservice.entity.Post;
+import com.revature.postservice.repository.CommentRepository;
 import com.revature.postservice.repository.PostRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,11 @@ import java.util.List;
 @Service
 public class PostService {
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
 
-    public PostService(PostRepository postRepository) {
+    public PostService(PostRepository postRepository, CommentRepository commentRepository) {
         this.postRepository = postRepository;
+        this.commentRepository = commentRepository;
     }
 
     public PostResponse create(String authorUsername, CreatePostRequest request) {
@@ -31,7 +34,7 @@ public class PostService {
         return toResponse(post);
     }
 
-    // ✅ Option 2: list by username(s), not id(s)
+
     public List<PostResponse> list(String authorUsername, List<String> authorUsernames, int limit) {
         if (limit <= 0 || limit > 200) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Limit must be between 1 and 200");
@@ -52,7 +55,6 @@ public class PostService {
         return posts.stream().limit(limit).map(this::toResponse).toList();
     }
 
-    // ✅ delete by postId, verify authorUsername matches currentUsername
     public void delete(Long postId, String currentUsername) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
@@ -61,6 +63,7 @@ public class PostService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to delete this post");
         }
 
+        commentRepository.deleteByPostId(postId);
         postRepository.deleteById(postId);
     }
 
@@ -69,12 +72,14 @@ public class PostService {
     }
 
     private PostResponse toResponse(Post post) {
+        Long commentsCount = commentRepository.countByPostId(post.getId());
         return new PostResponse(
                 post.getId(),
                 post.getAuthorUsername(),
                 post.getContent(),
                 post.getImageUrl(),
-                post.getCreatedAt()
+                post.getCreatedAt(),
+                commentsCount
         );
     }
 }
