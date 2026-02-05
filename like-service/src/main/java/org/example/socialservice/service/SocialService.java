@@ -22,32 +22,37 @@ public class SocialService {
         this.likeRepository = likeRepository;
     }
 
-    public Follow followUser(String personFollowing, String personBeingFollowed) throws Exception {
+    public Follow followUser(String followerUsername, String followeeUsername) throws Exception {
         // check explicitly with correct parameter order: follower, user
-        if (followRepository.existsByFollowerAndUser(personFollowing, personBeingFollowed)) {
-            throw new DuplicateFollowException("User " + personFollowing + " already follows " + personBeingFollowed);
+        if (followRepository.existsByFollowerUsernameAndFolloweeUsername(followerUsername, followeeUsername)) {
+            throw new DuplicateFollowException("User " + followerUsername + " already follows " + followeeUsername);
         }
 
         // construct Follow(user, follower) -> (personBeingFollowed, personFollowing)
-        Follow follow = new Follow(personBeingFollowed, personFollowing);
+        Follow follow = new Follow(followerUsername, followeeUsername);
 
         try {
             return followRepository.save(follow);
         } catch (DataIntegrityViolationException ex) {
-            throw new DuplicateFollowException("Duplicate follow attempt for follower: " + personFollowing, ex);
+            throw new DuplicateFollowException("Duplicate follow attempt for follower: " + followerUsername, ex);
         } catch (Exception e) {
             throw new Exception("Error while following user: " + e.getMessage(), e);
         }
     }
 
 
-    public List<Follow> getFollowers(String user) throws Exception {
-        List<Follow> followers = followRepository.findByUser(user);
-        return followers;
+    public List<String> getFollowers(String followeeUsername) throws Exception {
+    	return followRepository.findByFolloweeUsername(followeeUsername)
+                .stream()
+                .map(Follow::getFollowerUsername)
+                .toList();
     }
 
-    public List<Follow> getFollowing(String follower) {
-        return followRepository.findByFollower(follower);
+    public List<String> getFollowing(String followerUsername) {
+    	return followRepository.findByFollowerUsername(followerUsername)
+                .stream()
+                .map(Follow::getFolloweeUsername)
+                .toList();
     }
 
     public Like likePost(Long postId, String username) {
@@ -72,17 +77,16 @@ public class SocialService {
         return likeRepository.findByUsername(username);
     }
 
-    public void unfollowUser(String personUnfollowing, String personBeingUnfollowed) throws Exception {
+	public void unfollowUser(String followerUsername, String followeeUsername) throws Exception {
 		// check explicitly with correct parameter order: follower, user
-        if (!followRepository.existsByFollowerAndUser(personUnfollowing, personBeingUnfollowed)) {
-            throw new DuplicateFollowException("User " + personUnfollowing + " does not follow " + personBeingUnfollowed);
+        if (!followRepository.existsByFollowerUsernameAndFolloweeUsername(followerUsername, followeeUsername)) {
+            throw new DuplicateFollowException("User " + followerUsername + " does not follow " + followeeUsername);
         }
         
-        Follow follow = new Follow(personBeingUnfollowed, personUnfollowing);
         try {
-        	followRepository.delete(follow);
+        	followRepository.deleteByFollowerUsernameAndFolloweeUsername(followerUsername, followeeUsername);
         } catch (DataIntegrityViolationException ex) {
-            throw new DuplicateFollowException("Duplicate unfollow attempt for follower: " + personUnfollowing, ex);
+            throw new DuplicateFollowException("Duplicate unfollow attempt for follower: " + followerUsername, ex);
         } catch (Exception e) {
             throw new Exception("Error while unfollowing user: " + e.getMessage(), e);
         }
