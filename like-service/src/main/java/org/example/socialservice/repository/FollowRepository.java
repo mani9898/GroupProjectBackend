@@ -5,10 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface FollowRepository extends JpaRepository<Follow, Long> {
-    List<Follow> findByUser(String user);        // who follows this user
-    List<Follow> findByFollower(String follower); // who this user follows
+    List<Follow> findByFolloweeUsername(String followeeUsername);        // who follows this user
+    List<Follow> findByFollowerUsername(String followerUsername); // who this user follows
 
-    boolean existsByFollowerAndUser(String personFollowing, String personBeingFollowed);
+	void deleteByFollowerUsernameAndFolloweeUsername(String followerUsername, String followeeUsername);
+	boolean existsByFollowerUsernameAndFolloweeUsername(String followerUsername, String followeeUsername);
 
 }
 
