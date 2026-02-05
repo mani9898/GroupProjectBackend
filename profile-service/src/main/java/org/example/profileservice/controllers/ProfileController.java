@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/profiles")
+@CrossOrigin(origins = "*")
 public class ProfileController {
     private ProfileService profileService;
 
@@ -19,9 +20,9 @@ public class ProfileController {
         this.profileService = profileService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ProfileDto> getProfile(@PathVariable Long id) {
-        Profile profile = profileService.getProfileById(id);
+    @GetMapping("/{username}")
+    public ResponseEntity<ProfileDto> getProfile(@PathVariable String username) {
+        Profile profile = profileService.getByUsername(username);
         ProfileDto profileDto = new ProfileDto(profile.getId(),
                 profile.getUsername(), profile.getAboutMe(), profile.getDisplayName(),
                 profile.getProfilePictureUrl(), profile.getLocation(), profile.getBirthdate(),
@@ -57,21 +58,27 @@ public class ProfileController {
     @PutMapping("/{id}")
     public ResponseEntity<ProfileDto> updateProfile(@PathVariable Long id, @RequestBody ProfileDto profileDto, @AuthenticationPrincipal Jwt jwt) {
         String username = jwt.getSubject();
+        System.out.println(username);
+        System.out.println(profileDto.username());
         if (username.equalsIgnoreCase(profileDto.username())) {
+            Profile updatedProfile = new Profile(
+                    profileDto.username(),
+                    profileDto.aboutMe(),
+                    profileDto.displayName(),
+                    profileDto.profilePictureUrl(),
+                    profileDto.location(),
+                    profileDto.birthdate(),
+                    profileDto.gender(),
+                    profileDto.secondaryImageUrl(),
+                    profileDto.phoneNumber()
+            );
+            updatedProfile.setId(id);
 
             Profile profile = profileService.updateProfile(
                 id,
-                new Profile(
-                        profileDto.username(),
-                        profileDto.aboutMe(),
-                        profileDto.displayName(),
-                        profileDto.profilePictureUrl(),
-                        profileDto.location(),
-                        profileDto.birthdate(),
-                        profileDto.gender(),
-                        profileDto.secondaryImageUrl(),
-                        profileDto.phoneNumber()
-                ));
+                updatedProfile
+            );
+
         ProfileDto updatedProfileDto = new ProfileDto(profile.getId(),
                 profile.getUsername(), profile.getAboutMe(), profile.getDisplayName(),
                 profile.getProfilePictureUrl(), profile.getLocation(), profile.getBirthdate(),
@@ -80,6 +87,19 @@ public class ProfileController {
         } else {
             return ResponseEntity.status(403).build();
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<ProfileDto> searchProfileByUsername(@RequestParam String username) {
+        Profile profile = profileService.getByUsername(username);
+        if(profile == null){
+            return ResponseEntity.notFound().build();
+        }
+        ProfileDto profileDto = new ProfileDto(profile.getId(),
+                profile.getUsername(), profile.getAboutMe(), profile.getDisplayName(),
+                profile.getProfilePictureUrl(), profile.getLocation(), profile.getBirthdate(),
+                profile.getGender(), profile.getSecondaryImageUrl(), profile.getPhoneNumber());
+        return ResponseEntity.ok(profileDto);
     }
 
 }
