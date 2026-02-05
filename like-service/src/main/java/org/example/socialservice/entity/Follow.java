@@ -14,19 +14,19 @@ public class Follow {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "followee_username", nullable = false)
-    private String user;
     @Column(name = "follower_username", nullable = false)
-    private String follower;
+    private String followerUsername;
+    @Column(name = "followee_username", nullable = false)
+    private String followeeUsername;
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     
     public Follow() {
     }
     
-    public Follow(String user, String follower) {
-    	this.user = user;
-    	this.follower = follower;
+    public Follow(String followerUsername, String followeeUsername) {
+    	this.followerUsername = followerUsername;
+    	this.followeeUsername = followeeUsername;
     	this.createdAt = LocalDateTime.now();
     }
 
@@ -38,20 +38,20 @@ public class Follow {
         this.id = id;
     }
 
-    public String getUser() {
-        return user;
+    public String getFollowerUsername() {
+        return followerUsername;
     }
 
-    public void setUser(String user) {
-        this.user = user;
+    public void setFollowerUsername(String followerUsername) {
+        this.followerUsername = followerUsername;
     }
 
-    public String getFollower() {
-        return follower;
+    public String getFolloweeUsername() {
+        return followeeUsername;
     }
 
-    public void setFollower(String follower) {
-        this.follower = follower;
+    public void setFolloweeUsername(String followeeUsername) {
+        this.followeeUsername= followeeUsername;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -66,8 +66,8 @@ public class Follow {
     public String toString() {
         return "Follow{" +
                 "id=" + id +
-                ", user='" + user + '\'' +
-                ", follower='" + follower + '\'' +
+                ", followerUsername='" + followerUsername + '\'' +
+                ", followeeUsername='" + followeeUsername + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
     }
