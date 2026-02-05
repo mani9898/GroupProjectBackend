@@ -58,21 +58,27 @@ public class ProfileController {
     @PutMapping("/{id}")
     public ResponseEntity<ProfileDto> updateProfile(@PathVariable Long id, @RequestBody ProfileDto profileDto, @AuthenticationPrincipal Jwt jwt) {
         String username = jwt.getSubject();
+        System.out.println(username);
+        System.out.println(profileDto.username());
         if (username.equalsIgnoreCase(profileDto.username())) {
+            Profile updatedProfile = new Profile(
+                    profileDto.username(),
+                    profileDto.aboutMe(),
+                    profileDto.displayName(),
+                    profileDto.profilePictureUrl(),
+                    profileDto.location(),
+                    profileDto.birthdate(),
+                    profileDto.gender(),
+                    profileDto.secondaryImageUrl(),
+                    profileDto.phoneNumber()
+            );
+            updatedProfile.setId(id);
 
             Profile profile = profileService.updateProfile(
                 id,
-                new Profile(
-                        profileDto.username(),
-                        profileDto.aboutMe(),
-                        profileDto.displayName(),
-                        profileDto.profilePictureUrl(),
-                        profileDto.location(),
-                        profileDto.birthdate(),
-                        profileDto.gender(),
-                        profileDto.secondaryImageUrl(),
-                        profileDto.phoneNumber()
-                ));
+                updatedProfile
+            );
+
         ProfileDto updatedProfileDto = new ProfileDto(profile.getId(),
                 profile.getUsername(), profile.getAboutMe(), profile.getDisplayName(),
                 profile.getProfilePictureUrl(), profile.getLocation(), profile.getBirthdate(),
