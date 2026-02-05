@@ -61,11 +61,6 @@ public class SocialService {
     }
     
     public void unlikePost(Long postId, String username) {
-    	
-        if (!likeRepository.existsByPostIdAndUsername(postId, username)) {
-            throw new LikeNotFoundException("You have not liked this post");
-        }
-        
         likeRepository.deleteByPostIdAndUsername(postId, username);
     }
 
