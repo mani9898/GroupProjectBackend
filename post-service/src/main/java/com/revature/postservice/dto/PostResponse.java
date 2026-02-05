@@ -8,6 +8,8 @@ public record PostResponse(
         String content,
         String imageUrl,
         Instant createdAt,
-        Long commentCount
+        Long commentCount,
+        int likesCount,
+        boolean isLikedByCurrentUser
 ) {
 }
