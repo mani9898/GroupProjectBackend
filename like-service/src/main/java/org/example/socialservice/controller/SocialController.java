@@ -78,16 +78,16 @@ public class SocialController {
     }
 
     // Get followers of username
-    @GetMapping("/followers/{username}")
-    public ResponseEntity<List<String>> getFollowers(@PathVariable("username") String username) throws Exception {
-    	List<String> followers = socialService.getFollowers(username);
+    @GetMapping("/followers/{followeeUsername}")
+    public ResponseEntity<List<String>> getFollowers(@PathVariable("followeeUsername") String followeeUsername) throws Exception {
+    	List<String> followers = socialService.getFollowers(followeeUsername);
         return ResponseEntity.ok(followers);
     }
 
     // Get who the user is following
-    @GetMapping("/following/{username}")
-    public ResponseEntity<List<String>> getFollowing(@PathVariable("username") String username) {
-    	List<String> following = socialService.getFollowing(username);
+    @GetMapping("/following/{followerUsername}")
+    public ResponseEntity<List<String>> getFollowing(@PathVariable("followerUsername") String followerUsername) {
+    	List<String> following = socialService.getFollowing(followerUsername);
         return ResponseEntity.ok(following);
     }
 
