@@ -4,11 +4,12 @@ package org.example.socialservice.service;
 import org.example.socialservice.entity.Follow;
 import org.example.socialservice.entity.Like;
 import org.example.socialservice.exceptions.DuplicateFollowException;
-import org.example.socialservice.exceptions.LikeNotFoundException;
 import org.example.socialservice.repository.FollowRepository;
 import org.example.socialservice.repository.LikeRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
@@ -59,7 +60,8 @@ public class SocialService {
         Like like = new Like(postId, username);
         return likeRepository.save(like);
     }
-    
+
+    @Transactional
     public void unlikePost(Long postId, String username) {
         likeRepository.deleteByPostIdAndUsername(postId, username);
     }
@@ -72,6 +74,7 @@ public class SocialService {
         return likeRepository.findByUsername(username);
     }
 
+    @Transactional
 	public void unfollowUser(String followerUsername, String followeeUsername) throws Exception {
 		// check explicitly with correct parameter order: follower, user
         if (!followRepository.existsByFollowerUsernameAndFolloweeUsername(followerUsername, followeeUsername)) {
